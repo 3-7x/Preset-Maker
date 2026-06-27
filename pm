@@ -1,7 +1,4 @@
 print("Press P to start making a preset")
---[[
-do that 
-]]
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -77,7 +74,7 @@ local function makeBox(parent, text, pos, ph)
     local b = Instance.new("TextBox", parent)
     b.Size, b.Position, b.Text, b.PlaceholderText = UDim2.new(0.9,0,0,28), pos, text, ph
     b.BackgroundColor3, b.TextColor3, b.ClearTextOnFocus = Color3.fromRGB(30,30,35), Color3.fromRGB(220,220,220), false
-    b.Font, b.TextSize = Enum.Font.Gotham, 12
+    b.Font, b.TextSize = Enum.Font.Gotham, 13
     Instance.new("UICorner", b).CornerRadius = UDim.new(0,4)
     return b
 end
@@ -91,27 +88,108 @@ local function makeBtn(parent, txt, pos, col, cb)
     return b
 end
 
-local mainPanel = createPanel("Preset Maker",  "1283965824",  UDim2.new(0,220,0,345), UDim2.new(0,260,0.5,-190))
+-- Panels
+local mainPanel = createPanel("NodeGraph Editor", "1283965824", UDim2.new(0,220,0,345), UDim2.new(0,260,0.5,-190))
 local propPanel = createPanel("Rotator Props", "12690726311", UDim2.new(0,180,0,120), UDim2.new(1,-200,0.5,-60))
-local listPanel = createPanel("Explorer",      "11956055886", UDim2.new(0,200,0,300), UDim2.new(0,20,0.5,-150))
+local listPanel = createPanel("Explorer", "11956055886", UDim2.new(0,200,0,300), UDim2.new(0,20,0.5,-150))
+local codePanel = createPanel("Script Preset Maker", "11956055886", UDim2.new(0, 450, 0, 380), UDim2.new(0.5, -225, 0.5, -190))
 propPanel.Visible = false
 
+-- Explorer List
 local scrollList = Instance.new("ScrollingFrame", listPanel)
 scrollList.Size, scrollList.Position, scrollList.BackgroundTransparency = UDim2.new(1,0,1,-35), UDim2.new(0,0,0,35), 1
 scrollList.CanvasSize, scrollList.ScrollBarThickness = UDim2.new(0,0,0,0), 4
 local listLayout = Instance.new("UIListLayout", scrollList); listLayout.Padding = UDim.new(0,2)
 
+-- NodeGraph UI
 local nameB     = makeBox(mainPanel, "", UDim2.new(0.05,0,0,40),  "Preset Name")
 local moveSnapB = makeBox(mainPanel, "", UDim2.new(0.05,0,0,73),  "Move Snap (Studs)")
 local rotSnapB  = makeBox(mainPanel, "", UDim2.new(0.05,0,0,106), "Rotation Degrees")
 local speedB    = makeBox(propPanel, "", UDim2.new(0.05,0,0,40),  "Speed")
 local sensB     = makeBox(propPanel, "", UDim2.new(0.05,0,0,75),  "Music Sens (0-100)")
 
+-- Script Editor UI
+local codePanel = createPanel("                                                 code yo thing", "11348555035", UDim2.new(0, 450, 0, 400), UDim2.new(0.5, -225, 0.5, -200))
+
+local linkBox = Instance.new("TextBox", codePanel)
+linkBox.Size = UDim2.new(0.9, 0, 0, 20)
+linkBox.Position = UDim2.new(0.05, 0, 0, 40)
+
+linkBox.BackgroundTransparency = 1
+linkBox.Text = "Examples: https://pastefy.app/MHWAyi9F"
+linkBox.TextColor3 = Color3.fromRGB(100, 150, 255)
+linkBox.Font = Enum.Font.Gotham
+linkBox.TextSize = 12
+linkBox.TextXAlignment = Enum.TextXAlignment.Left
+
+linkBox.ClearTextOnFocus = false
+linkBox.MultiLine = false
+
+local codeBox = Instance.new("TextBox", codePanel)
+codeBox.Size = UDim2.new(0.9, 0, 1, -130) -- Resized to prevent overflow
+codeBox.Position = UDim2.new(0.05, 0, 0, 65)
+codeBox.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+codeBox.TextColor3 = Color3.fromRGB(200, 255, 200)
+codeBox.Font = Enum.Font.Code
+codeBox.TextSize = 14
+codeBox.TextXAlignment = Enum.TextXAlignment.Left
+codeBox.TextYAlignment = Enum.TextYAlignment.Top
+codeBox.ClipsDescendants = true
+codeBox.MultiLine = true
+codeBox.ClearTextOnFocus = false
+Instance.new("UICorner", codeBox).CornerRadius = UDim.new(0, 4)
+codeBox.Text = [[-- Return a function(i, total, t, hrp, audioPulse, size, height, speed)
+return function(i, total, t, hrp, audioPulse, size, height, speed)
+    local angle = (math.pi * 2 / total) * (i - 1) + (t * speed)
+    local radius = size + audioPulse
+    local x = math.cos(angle) * radius
+    local z = math.sin(angle) * radius
+    local y = height + math.sin(t * 2 + i) * 2
+    
+    local pos = hrp.CFrame:PointToWorldSpace(Vector3.new(x, y, z))
+    local rot = CFrame.lookAt(pos, hrp.Position)
+    return pos, rot
+end]]
+
+local scriptNameB = Instance.new("TextBox", codePanel)
+scriptNameB.Size = UDim2.new(0.4, 0, 0, 28)
+scriptNameB.Position = UDim2.new(0.05, 0, 1, -45)
+scriptNameB.Text = ""
+scriptNameB.PlaceholderText = "Script Preset Name"
+scriptNameB.BackgroundColor3 = Color3.fromRGB(30,30,35)
+scriptNameB.TextColor3 = Color3.fromRGB(220,220,220)
+scriptNameB.ClearTextOnFocus = false
+scriptNameB.Font = Enum.Font.Gotham
+scriptNameB.TextSize = 12
+Instance.new("UICorner", scriptNameB).CornerRadius = UDim.new(0, 4)
+
+local saveBtn = Instance.new("TextButton", codePanel)
+saveBtn.Size = UDim2.new(0.45, 0, 0, 28)
+saveBtn.Position = UDim2.new(0.5, 0, 1, -45)
+saveBtn.BackgroundColor3 = Color3.fromRGB(44, 115, 78)
+saveBtn.Text = "Save Script Preset"
+saveBtn.TextColor3 = Color3.new(1, 1, 1)
+saveBtn.Font = Enum.Font.GothamBold
+saveBtn.TextSize = 12
+Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 4)
+
+saveBtn.MouseButton1Click:Connect(function()
+    local name = scriptNameB.Text
+    if name == "" then return end
+    if writefile then
+        if not isfolder("OpenViz") then makefolder("OpenViz") end
+        writefile("OpenViz/" .. name .. ".preset", codeBox.Text)
+        print("Architect: Saved -> OpenViz/" .. name .. ".preset")
+    end
+end)
+
+-- Handles
 local moveHandles = Instance.new("Handles", gui)
 moveHandles.Style, moveHandles.Color3 = Enum.HandlesStyle.Movement, Color3.fromRGB(90,160,255)
 local rotHandles = Instance.new("ArcHandles", gui)
 rotHandles.Color3 = Color3.fromRGB(200,100,255)
 
+-- Node Graph Logic
 local function findNodeByID(id)
     for _, v in ipairs(ghostFolder:GetChildren()) do if v:GetAttribute("ID") == id then return v end end
     return nil
@@ -287,7 +365,7 @@ makeBtn(mainPanel, "Toggle Preview", UDim2.new(0.05,0,0,276), Color3.fromRGB(59,
         drawBeams()
     end
 end)
-makeBtn(mainPanel, "Save Preset",    UDim2.new(0.05,0,0,309), Color3.fromRGB(44,115,78), function()
+makeBtn(mainPanel, "Save Node Preset", UDim2.new(0.05,0,0,309), Color3.fromRGB(44,115,78), function()
     updateRelativeOffsets()
     local data = { Name = nameB.Text, Type = "NodeGraph", Nodes = {}, Tools = {} }
     for _, p in ipairs(ghostFolder:GetChildren()) do
@@ -304,7 +382,7 @@ makeBtn(mainPanel, "Save Preset",    UDim2.new(0.05,0,0,309), Color3.fromRGB(44,
     if writefile then
         if not isfolder("OpenViz") then makefolder("OpenViz") end
         writefile("OpenViz/" .. nameB.Text .. ".json", HttpService:JSONEncode(data))
-        print("Architect: Saved → OpenViz/" .. nameB.Text .. ".json")
+        print("Architect: Saved -> OpenViz/" .. nameB.Text .. ".json")
     end
 end)
 
